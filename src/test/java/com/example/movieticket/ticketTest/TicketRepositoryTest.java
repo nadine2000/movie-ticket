@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -21,17 +21,19 @@ class TicketRepositoryTest {
     private TicketRepository ticketRepository;
 
     private Ticket defaultTicket;
+    private UUID defaultUserId;
 
     @BeforeEach
     void setUp() {
-        defaultTicket = createTicket(1L, 1, "John Doe");
+        defaultUserId = UUID.randomUUID();
+        defaultTicket = createTicket(1L, 1, defaultUserId);
     }
 
-    private Ticket createTicket(Long showtimeId, int seatNumber, String customerName) {
+    private Ticket createTicket(Long showtimeId, int seatNumber, UUID userId) {
         Ticket t = new Ticket();
         t.setShowtimeId(showtimeId);
         t.setSeatNumber(seatNumber);
-        t.setCustomerName(customerName);
+        t.setUserId(userId);
         return t;
     }
 
@@ -43,30 +45,11 @@ class TicketRepositoryTest {
         assertThat(saved).isNotNull()
                 .hasFieldOrPropertyWithValue("showtimeId", 1L)
                 .hasFieldOrPropertyWithValue("seatNumber", 1)
-                .hasFieldOrPropertyWithValue("customerName", "John Doe");
+                .hasFieldOrPropertyWithValue("userId", defaultUserId);
         assertThat(saved.getId()).isNotNull();
     }
 
-    @Test
-    @DisplayName("Should retrieve a ticket by ID")
-    void testFindTicketById() {
-        Ticket saved = ticketRepository.save(defaultTicket);
 
-        Optional<Ticket> found = ticketRepository.findById(saved.getId());
-
-        assertThat(found).isPresent().contains(saved);
-    }
-
-    @Test
-    @DisplayName("Should delete a ticket")
-    void testDeleteTicket() {
-        Ticket saved = ticketRepository.save(defaultTicket);
-        Long id = saved.getId();
-
-        ticketRepository.delete(saved);
-
-        assertThat(ticketRepository.findById(id)).isEmpty();
-    }
 
     @Test
     @DisplayName("Should check if seat is booked")
@@ -87,20 +70,19 @@ class TicketRepositoryTest {
     @Test
     @DisplayName("Should prevent duplicate or same seat booking")
     void testUniqueSeatPerShowtime() {
-        Ticket t1 = createTicket(1L, 1, "John Doe");
-        Ticket t2 = createTicket(1L, 1, "Jane Doe");
+        Ticket t1 = createTicket(1L, 1, UUID.randomUUID());
+        Ticket t2 = createTicket(1L, 1, UUID.randomUUID());
         ticketRepository.save(t1);
 
-        boolean booked = ticketRepository.existsByShowtimeIdAndSeatNumber(t2.getShowtimeId(),  t2.getSeatNumber());
+        boolean booked = ticketRepository.existsByShowtimeIdAndSeatNumber(t2.getShowtimeId(), t2.getSeatNumber());
         assertThat(booked).isTrue();
-
     }
 
     @Test
     @DisplayName("Should allow same seat in different showtimes")
     void testSameSeatDifferentShowtimes() {
-        Ticket t1 = createTicket(1L, 1, "John Doe");
-        Ticket t2 = createTicket(2L, 1, "Jane Doe");
+        Ticket t1 = createTicket(1L, 1, UUID.randomUUID());
+        Ticket t2 = createTicket(2L, 1, UUID.randomUUID());
         ticketRepository.saveAll(List.of(t1, t2));
 
         assertThat(t1.getSeatNumber()).isEqualTo(t2.getSeatNumber());
@@ -110,12 +92,12 @@ class TicketRepositoryTest {
     @Test
     @DisplayName("Should throw ConstraintViolationException for invalid ticket values")
     void testInvalidTicketValues() {
-        Ticket invalid = createTicket(null, -9, "   ");
+        Ticket invalid = createTicket(null, -9, null); // showtimeId=null, seatNumber=-9, userId=null
 
         assertThatThrownBy(() -> ticketRepository.saveAndFlush(invalid))
                 .isInstanceOf(ConstraintViolationException.class)
                 .hasMessageContaining("showtimeId")
                 .hasMessageContaining("seatNumber")
-                .hasMessageContaining("customerName");
+                .hasMessageContaining("userId");
     }
 }

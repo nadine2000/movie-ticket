@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +40,7 @@ class MovieServiceTest {
                 "The Matrix",
                 "Sci-Fi",
                 136,
-                8,
+                8.0,
                 1999
         );
 
@@ -50,7 +49,7 @@ class MovieServiceTest {
                 "The Matrix Reloaded",
                 "Action",
                 138,
-                7,
+                7.0,
                 2003
         );
     }
@@ -61,7 +60,7 @@ class MovieServiceTest {
 
         @Test
         @DisplayName("Should successfully add a new movie")
-        void shouldAddMovie_WhenValidMovieProvided() {
+        void shouldAddMovieWhenValidMovieProvided() {
             when(movieRepository.save(any(Movie.class))).thenReturn(testMovie);
 
             movieService.addMovie(testMovie);
@@ -71,7 +70,7 @@ class MovieServiceTest {
 
         @Test
         @DisplayName("Should call repository save method with correct movie object")
-        void shouldCallRepositorySave_WithCorrectMovieObject() {
+        void shouldCallRepositorySaveWithCorrectMovieObject() {
             when(movieRepository.save(testMovie)).thenReturn(testMovie);
 
             movieService.addMovie(testMovie);
@@ -90,8 +89,8 @@ class MovieServiceTest {
 
         @Test
         @DisplayName("Should return list of all movies")
-        void shouldReturnAllMovies_WhenMoviesExist() {
-            Movie movie2 = new Movie(2L, "Inception", "Thriller", 148, 8, 2010);
+        void shouldReturnAllMoviesWhenMoviesExist() {
+            Movie movie2 = new Movie(2L, "Inception", "Thriller", 148, 8.0, 2010);
             List<Movie> expectedMovies = Arrays.asList(testMovie, movie2);
             when(movieRepository.findAll()).thenReturn(expectedMovies);
 
@@ -106,7 +105,7 @@ class MovieServiceTest {
 
         @Test
         @DisplayName("Should return empty list when no movies exist")
-        void shouldReturnEmptyList_WhenNoMoviesExist() {
+        void shouldReturnEmptyListWhenNoMoviesExist() {
             when(movieRepository.findAll()).thenReturn(List.of());
 
             List<Movie> actualMovies = movieService.getMovies();
@@ -117,33 +116,33 @@ class MovieServiceTest {
     }
 
     @Nested
-    @DisplayName("getMovieById() Tests")
+    @DisplayName("getMovieByTitle() Tests")
     class GetMovieByIdTests {
 
         @Test
-        @DisplayName("Should return movie when valid id is provided")
-        void shouldReturnMovie_WhenValidIdProvided() {
-            when(movieRepository.findById(1L)).thenReturn(Optional.of(testMovie));
+        @DisplayName("Should return movie when valid title is provided")
+        void shouldReturnMovieWhenValidTitleProvided() {
+            when(movieRepository.findByTitle("The Matrix")).thenReturn(Optional.of(testMovie));
 
-            Movie actualMovie = movieService.getMovieById(1L);
+            Movie actualMovie = movieService.getMovieByTitle("The Matrix");
 
             assertThat(actualMovie)
                     .isNotNull()
                     .isEqualTo(testMovie);
             assertThat(actualMovie.getTitle()).isEqualTo("The Matrix");
-            verify(movieRepository, times(1)).findById(1L);
+            verify(movieRepository, times(1)).findByTitle("The Matrix");
         }
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when movie not found")
-        void shouldThrowResourceNotFoundException_WhenMovieNotFound() {
-            Long nonExistentId = 999L;
-            when(movieRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+        void shouldThrowResourceNotFoundExceptionWhenMovieNotFound() {
+            String nonExistentTitle = "NOT EXISTING MOVIE";
+            when(movieRepository.findByTitle(nonExistentTitle)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> movieService.getMovieById(nonExistentId))
+            assertThatThrownBy(() -> movieService.getMovieByTitle(nonExistentTitle))
                     .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("ERROR: Movie with id " + nonExistentId + " does not exist.");
-            verify(movieRepository, times(1)).findById(nonExistentId);
+                    .hasMessageContaining("ERROR: Movie with title " + nonExistentTitle + " does not exist.");
+            verify(movieRepository, times(1)).findByTitle(nonExistentTitle);
         }
     }
 
@@ -152,51 +151,50 @@ class MovieServiceTest {
     class UpdateMovieTests {
 
         @Test
-        @DisplayName("Should update movie successfully when valid id and details provided")
-        void shouldUpdateMovie_WhenValidIdAndDetailsProvided() {
-            when(movieRepository.existsById(1L)).thenReturn(true);
+        @DisplayName("Should update movie successfully when valid title and details provided")
+        void shouldUpdateMovieWhenValidTitleAndDetailsProvided() {
+            when(movieRepository.findByTitle("The Matrix")).thenReturn(Optional.of(testMovie));
             when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
 
-            Movie result = movieService.updateMovie(1L, updatedMovie);
+            Movie result = movieService.updateMovie("The Matrix", updatedMovie);
 
             assertThat(result).isNotNull();
-            assertThat(result.getId()).isEqualTo(1L);
             assertThat(result.getTitle()).isEqualTo("The Matrix Reloaded");
-            verify(movieRepository, times(1)).existsById(1L);
+            verify(movieRepository, times(1)).findByTitle("The Matrix");
             verify(movieRepository, times(1)).save(any(Movie.class));
         }
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when updating non-existent movie")
-        void shouldThrowResourceNotFoundException_WhenUpdatingNonExistentMovie() {
-            Long nonExistentId = 999L;
-            when(movieRepository.existsById(nonExistentId)).thenReturn(false);
+        void shouldThrowResourceNotFoundExceptionWhenUpdatingNonExistentMovie() {
+            String nonExistentTitle = "NOT EXISTING MOVIE";
+            when(movieRepository.findByTitle(nonExistentTitle)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> movieService.updateMovie(nonExistentId, updatedMovie))
+            assertThatThrownBy(() -> movieService.updateMovie(nonExistentTitle, updatedMovie))
                     .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("ERROR: Movie with id " + nonExistentId + " does not exist.");
-            verify(movieRepository, times(1)).existsById(nonExistentId);
+                    .hasMessageContaining("ERROR: Movie with title "+ nonExistentTitle +" does not exist.");
+            verify(movieRepository, times(1)).findByTitle(nonExistentTitle);
             verify(movieRepository, never()).save(any(Movie.class));
         }
 
         @Test
         @DisplayName("Should create new Movie object with updated details")
-        void shouldCreateNewMovieObject_WithUpdatedDetails() {
-
-            when(movieRepository.existsById(1L)).thenReturn(true);
+        void shouldCreateNewMovieObjectWithUpdatedDetails() {
+            when(movieRepository.findByTitle("The Matrix")).thenReturn(Optional.of(testMovie));
             when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
 
-            movieService.updateMovie(1L, updatedMovie);
+            movieService.updateMovie("The Matrix", updatedMovie);
 
             verify(movieRepository).save(argThat(movie ->
                     movie.getId().equals(1L) &&
                             movie.getTitle().equals("The Matrix Reloaded") &&
                             movie.getGenre().equals("Action") &&
                             movie.getDuration() == 138 &&
-                            movie.getRating() == 7 &&
+                            movie.getRating() == 7.0 &&
                             movie.getReleaseYear() == 2003
             ));
         }
+
     }
 
     @Nested
@@ -204,56 +202,28 @@ class MovieServiceTest {
     class DeleteMovieTests {
 
         @Test
-        @DisplayName("Should delete movie successfully when valid id provided")
-        void shouldDeleteMovie_WhenValidIdProvided() {
-            when(movieRepository.findById(1L)).thenReturn(Optional.of(testMovie));
+        @DisplayName("Should delete movie successfully when valid title provided")
+        void shouldDeleteMovieWhenValidTitleProvided() {
+            when(movieRepository.findByTitle("The Matrix")).thenReturn(Optional.of(testMovie));
             doNothing().when(movieRepository).delete(testMovie);
 
-            movieService.deleteMovie(1L);
+            movieService.deleteMovie("The Matrix");
 
-
-            verify(movieRepository, times(1)).findById(1L);
+            verify(movieRepository, times(1)).findByTitle("The Matrix");
             verify(movieRepository, times(1)).delete(testMovie);
         }
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when deleting non-existent movie")
         void shouldThrowResourceNotFoundException_WhenDeletingNonExistentMovie() {
-            Long nonExistentId = 999L;
-            when(movieRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            String nonExistentTitle = "NOT EXISTING MOVIE";
+            when(movieRepository.findByTitle(nonExistentTitle)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> movieService.deleteMovie(nonExistentId))
+            assertThatThrownBy(() -> movieService.deleteMovie(nonExistentTitle))
                     .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("ERROR: Movie with id " + nonExistentId + " does not exist.");
-            verify(movieRepository, times(1)).findById(nonExistentId);
+                    .hasMessageContaining("ERROR: Movie with title "+ nonExistentTitle +" does not exist.");
+            verify(movieRepository, times(1)).findByTitle(nonExistentTitle);
             verify(movieRepository, never()).delete(any(Movie.class));
-        }
-    }
-
-    @Nested
-    @DisplayName("validateMovieExists() Tests")
-    class ValidateMovieExistsTests {
-
-        @Test
-        @DisplayName("Should not throw exception when movie exists")
-        void shouldNotThrowException_WhenMovieExists() {
-            when(movieRepository.existsById(1L)).thenReturn(true);
-
-            assertThatCode(() -> movieService.validateMovieExists(1L))
-                    .doesNotThrowAnyException();
-            verify(movieRepository, times(1)).existsById(1L);
-        }
-
-        @Test
-        @DisplayName("Should throw ResourceNotFoundException when movie does not exist")
-        void shouldThrowResourceNotFoundException_WhenMovieDoesNotExist() {
-            Long nonExistentId = 999L;
-            when(movieRepository.existsById(nonExistentId)).thenReturn(false);
-
-            assertThatThrownBy(() -> movieService.validateMovieExists(nonExistentId))
-                    .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("ERROR: Movie with id " + nonExistentId + " does not exist.");
-            verify(movieRepository, times(1)).existsById(nonExistentId);
         }
     }
 }

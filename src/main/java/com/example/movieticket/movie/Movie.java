@@ -30,7 +30,7 @@ public class Movie {
     @Min(value = 0, message = " minimum rating is 0. ")
     @Max(value = 10, message = " maximum rating  is 10. ")
     @NotNull(message = " Rating is required. ")
-    private Integer rating;
+    private Double rating;
 
     @Min(value = 1900, message = "Release year must be at least 1900")
     @Max(value = 2100, message = "Release year cannot be greater than 2100")

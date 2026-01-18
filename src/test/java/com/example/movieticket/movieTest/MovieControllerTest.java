@@ -4,6 +4,7 @@ import com.example.movieticket.exception.GlobalExceptionHandler;
 import com.example.movieticket.movie.*;
 import com.example.movieticket.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MovieController Tests")
@@ -55,7 +57,7 @@ class MovieControllerTest {
                 "The Matrix",
                 "Sci-Fi",
                 136,
-                8,
+                8.0,
                 1999
         );
 
@@ -64,7 +66,7 @@ class MovieControllerTest {
                 "The Matrix Reloaded",
                 "Action",
                 138,
-                7,
+                7.0,
                 2003
         );
     }
@@ -72,50 +74,55 @@ class MovieControllerTest {
     @Nested
     @DisplayName("POST /movies")
     class AddMovieTests {
-
         @Test
-        void shouldAddMovie_Return201() throws Exception {
+        void shouldAddMovieReturn200() throws Exception {
             doNothing().when(movieService).addMovie(any(Movie.class));
 
             mockMvc.perform(post("/movies")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testMovie)))
                     .andDo(print())
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string("Movie was added successfully."));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.title").value("The Matrix"))
+                    .andExpect(jsonPath("$.genre").value("Sci-Fi"))
+                    .andExpect(jsonPath("$.duration").value(136))
+                    .andExpect(jsonPath("$.rating").value(8.0))
+                    .andExpect(jsonPath("$.releaseYear").value(1999));
 
             verify(movieService).addMovie(any(Movie.class));
         }
 
         @Test
-        void shouldCallServiceWithCorrectMovieData() throws Exception {
-            doNothing().when(movieService).addMovie(any(Movie.class));
+        @DisplayName("POST /movies - should return 400 Bad Request when invalid data is sent")
+        void shouldReturnBadRequest_WhenInvalidMovieData() throws Exception {
+            Movie invalidMovie = new Movie(null, "", "", -10, 15.0, 1800);
 
             mockMvc.perform(post("/movies")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(testMovie)))
-                    .andExpect(status().isCreated());
+                            .content(objectMapper.writeValueAsString(invalidMovie)))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message.title").exists())
+                    .andExpect(jsonPath("$.message.genre").exists())
+                    .andExpect(jsonPath("$.message.duration").exists())
+                    .andExpect(jsonPath("$.message.rating").exists())
+                    .andExpect(jsonPath("$.message.releaseYear").exists())
+                    .andExpect(jsonPath("$.error").value("Validation Error"))
+                    .andExpect(jsonPath("$.status").value(400));
 
-            verify(movieService).addMovie(argThat(movie ->
-                    movie.getTitle().equals("The Matrix") &&
-                            movie.getGenre().equals("Sci-Fi") &&
-                            movie.getDuration() == 136 &&
-                            movie.getRating() == 8 &&
-                            movie.getReleaseYear() == 1999
-            ));
         }
     }
 
     @Nested
-    @DisplayName("GET /movies")
+    @DisplayName("GET /movies/all")
     class GetMoviesTests {
 
         @Test
         void shouldReturnAllMovies() throws Exception {
-            Movie movie2 = new Movie(2L, "Inception", "Thriller", 148, 8, 2010);
+            Movie movie2 = new Movie(2L, "Inception", "Thriller", 148, 8.0, 2010);
             when(movieService.getMovies()).thenReturn(Arrays.asList(testMovie, movie2));
 
-            mockMvc.perform(get("/movies"))
+            mockMvc.perform(get("/movies/all"))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -128,7 +135,7 @@ class MovieControllerTest {
         void shouldReturnEmptyList() throws Exception {
             when(movieService.getMovies()).thenReturn(List.of());
 
-            mockMvc.perform(get("/movies"))
+            mockMvc.perform(get("/movies/all"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(0)));
 
@@ -137,59 +144,60 @@ class MovieControllerTest {
     }
 
     @Nested
-    @DisplayName("PUT /movies/{id}")
+    @DisplayName("PUT /movies/update/{movieTitle}")
     class UpdateMovieTests {
 
         @Test
         void shouldUpdateMovie() throws Exception {
-            when(movieService.updateMovie(eq(1L), any(Movie.class)))
+            when(movieService.updateMovie(eq("The Matrix"), any(Movie.class)))
                     .thenReturn(updatedMovie);
 
-            mockMvc.perform(put("/movies/1")
+            mockMvc.perform(put("/movies/update/The Matrix")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedMovie)))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.title", is("The Matrix Reloaded")))
-                    .andExpect(jsonPath("$.rating", is(7)));
+                    .andExpect(jsonPath("$.rating", is(7.0)));
 
-            verify(movieService).updateMovie(eq(1L), any(Movie.class));
+            verify(movieService).updateMovie(eq("The Matrix"), any(Movie.class));
         }
 
         @Test
-        void shouldReturn404_WhenMovieNotFound() throws Exception {
-            when(movieService.updateMovie(eq(999L), any(Movie.class)))
+        void shouldReturn404WhenMovieNotFound() throws Exception {
+            when(movieService.updateMovie(eq("NonExistent"), any(Movie.class)))
                     .thenThrow(new ResourceNotFoundException("not found"));
 
-            mockMvc.perform(put("/movies/999")
+            mockMvc.perform(put("/movies/update/NonExistent")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedMovie)))
                     .andExpect(status().isNotFound());
         }
+
     }
 
     @Nested
-    @DisplayName("DELETE /movies/{id}")
+    @DisplayName("DELETE /movies/{movieTitle}")
     class DeleteMovieTests {
 
         @Test
         void shouldDeleteMovie() throws Exception {
-            doNothing().when(movieService).deleteMovie(1L);
+            doNothing().when(movieService).deleteMovie("The Matrix");
 
-            mockMvc.perform(delete("/movies/1"))
+            mockMvc.perform(delete("/movies/The Matrix"))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Movie with id 1 was deleted successfully."));
+                    .andExpect(content().string("Movie with title The Matrix was deleted successfully."));
 
-            verify(movieService).deleteMovie(1L);
+            verify(movieService).deleteMovie("The Matrix");
         }
 
         @Test
-        void shouldReturn404_WhenDeletingNonExistentMovie() throws Exception {
+        void shouldReturn404WhenDeletingNonExistentMovie() throws Exception {
             doThrow(new ResourceNotFoundException("not found"))
-                    .when(movieService).deleteMovie(999L);
+                    .when(movieService).deleteMovie("NonExistent");
 
-            mockMvc.perform(delete("/movies/999"))
+            mockMvc.perform(delete("/movies/NonExistent"))
                     .andExpect(status().isNotFound());
         }
     }

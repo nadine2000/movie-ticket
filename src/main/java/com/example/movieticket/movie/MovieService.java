@@ -14,32 +14,27 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public Movie updateMovie(Long id, Movie movieDetails) {
-
-        validateMovieExists(id);
-
-        return movieRepository.save(new Movie(
-                    id,
-                    movieDetails.getTitle(),
-                    movieDetails.getGenre(),
-                    movieDetails.getDuration(),
-                    movieDetails.getRating(),
-                    movieDetails.getReleaseYear()
-                    ));
-
+    public Movie updateMovie(String movieTitle, Movie movieDetails) {
+        getMovieByTitle(movieTitle);
+        return movieRepository.save(movieDetails);
     }
 
     public void addMovie(Movie movie) {
         movieRepository.save(movie);
     }
 
-    public void deleteMovie(long id) {
-        Movie toDelete = getMovieById(id);
+    public void deleteMovie(String movieTitle) {
+        Movie toDelete = getMovieByTitle(movieTitle);
         movieRepository.delete(toDelete);
     }
 
     public List<Movie> getMovies() {
         return movieRepository.findAll();
+    }
+
+    public Movie getMovieByTitle(String movieTitle) {
+        return movieRepository.findByTitle(movieTitle)
+                .orElseThrow(() -> new ResourceNotFoundException("ERROR: Movie with title " + movieTitle + " does not exist."));
     }
 
     public void validateMovieExists(long id) {
@@ -48,8 +43,4 @@ public class MovieService {
         }
     }
 
-    public Movie getMovieById(Long id) {
-        return movieRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ERROR: Movie with id " + id + " does not exist."));
-    }
 }

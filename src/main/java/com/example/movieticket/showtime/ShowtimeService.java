@@ -54,6 +54,7 @@ public class ShowtimeService {
                 .orElseThrow(() -> new ResourceNotFoundException("ERROR: Showtime with id " + id + " does not exist."));
     }
 
+
     private void validateShowtime(Showtime showtime) {
 
         if (!showtime.getEndTime().isAfter(showtime.getStartTime())) {

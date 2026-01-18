@@ -3,6 +3,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.util.UUID;
+
 
 @Entity
 @NoArgsConstructor
@@ -12,8 +14,8 @@ import lombok.*;
 public class Ticket {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @NotNull(message = "Showtime ID is required")
     @Positive(message = "Showtime ID must be positive.")
@@ -24,7 +26,6 @@ public class Ticket {
     @NotNull(message = " seat number is required. ")
     private Integer seatNumber;
 
-    @NotBlank(message = "Customer name is required")
-    private String customerName;
-
+    @NotNull(message = "User id is required.")
+    private UUID userId;
 }

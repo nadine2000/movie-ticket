@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +16,7 @@ import static org.assertj.core.api.Assertions.*;
 
 
 @DataJpaTest
-@DisplayName("Movie Repository Integration Tests")
+@DisplayName("Movie Repository Tests")
 class MovieRepositoryTest {
 
     @Autowired
@@ -27,10 +26,10 @@ class MovieRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        defaultMovie = createMovie("Test Movie", "Action", 120, 5, 2023);
+        defaultMovie = createMovie("Test Movie", "Action", 120, 5.0, 2023);
     }
 
-    private Movie createMovie(String title, String genre, int duration, int rating, int releaseYear) {
+    private Movie createMovie(String title, String genre, int duration, double rating, int releaseYear) {
         Movie movie = new Movie();
         movie.setTitle(title);
         movie.setGenre(genre);
@@ -49,32 +48,31 @@ class MovieRepositoryTest {
         assertThat(savedMovie.getTitle()).isEqualTo("Test Movie");
         assertThat(savedMovie.getGenre()).isEqualTo("Action");
         assertThat(savedMovie.getDuration()).isEqualTo(120);
-        assertThat(savedMovie.getRating()).isEqualTo(5);
+        assertThat(savedMovie.getRating()).isEqualTo(5.0);
         assertThat(savedMovie.getReleaseYear()).isEqualTo(2023);
     }
 
     @Test
-    @DisplayName("Should find a movie by ID")
+    @DisplayName("Should find a movie by Title")
     void testFindMovieById() {
         Movie savedMovie = movieRepository.save(defaultMovie);
 
-        Optional<Movie> found = movieRepository.findById(savedMovie.getId());
+        Optional<Movie> found = movieRepository.findByTitle(savedMovie.getTitle());
 
-        assertThat(found).isPresent()
-                .contains(savedMovie);
+        assertThat(found).isPresent().contains(savedMovie);
     }
 
     @Test
     @DisplayName("Should return empty Optional for non-existent movie")
     void testFindMovieByIdNotFound() {
-        assertThat(movieRepository.findById(999L)).isEmpty();
+        assertThat(movieRepository.findByTitle("NOT FOUND")).isEmpty();
     }
 
     @Test
     @DisplayName("Should retrieve all movies")
     void testFindAllMovies() {
-        Movie movie1 = createMovie("Movie 1", "Action", 100, 7, 2020);
-        Movie movie2 = createMovie("Movie 2", "Drama", 110, 8, 2021);
+        Movie movie1 = createMovie("Movie 1", "Action", 100, 7.0, 2020);
+        Movie movie2 = createMovie("Movie 2", "Drama", 110, 8.0, 2021);
 
         movieRepository.saveAll(List.of(movie1, movie2));
 
@@ -91,7 +89,7 @@ class MovieRepositoryTest {
         Movie savedMovie = movieRepository.save(defaultMovie);
 
         savedMovie.setTitle("Updated Title");
-        savedMovie.setRating(9);
+        savedMovie.setRating(9.0);
 
         Movie updated = movieRepository.save(savedMovie);
 
@@ -103,11 +101,11 @@ class MovieRepositoryTest {
     @DisplayName("Should delete a movie")
     void testDeleteMovie() {
         Movie savedMovie = movieRepository.save(defaultMovie);
-        Long id = savedMovie.getId();
+        String title = savedMovie.getTitle();
 
         movieRepository.delete(savedMovie);
 
-        assertThat(movieRepository.findById(id)).isEmpty();
+        assertThat(movieRepository.findByTitle(title)).isEmpty();
     }
 
     @Test

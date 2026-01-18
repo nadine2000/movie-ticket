@@ -2,19 +2,23 @@ package com.example.movieticket.showtime;
 
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/showtime")
+@RequestMapping("/showtimes")
 public class ShowtimeController {
 
     private final ShowtimeService showtimeService;
 
     public ShowtimeController(ShowtimeService showtimeService) {
         this.showtimeService = showtimeService;
+    }
+
+    @GetMapping("/{id}")
+    public Showtime getShowtimeById(@PathVariable Long id) {
+        return showtimeService.getShowtimeById(id);
     }
 
     @PutMapping("/{id}")
@@ -28,19 +32,14 @@ public class ShowtimeController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addNewShowtime(@Valid @RequestBody Showtime showtime) {
+    public ResponseEntity<Showtime> addNewShowtime(@Valid @RequestBody Showtime showtime) {
         showtimeService.addShowtime(showtime);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Showtime was added successfully.");
+        return ResponseEntity.ok(showtime);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteShowtime(@PathVariable Long id) {
         showtimeService.deleteShowtime(id);
         return ResponseEntity.ok("Showtime with id " + id + " was deleted successfully.");
-    }
-
-    @GetMapping("/{id}")
-    public Showtime getShowtimeById(@PathVariable Long id) {
-        return showtimeService.getShowtimeById(id);
     }
 }

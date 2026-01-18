@@ -2,7 +2,6 @@ package com.example.movieticket.movie;
 
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,30 +16,33 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @PutMapping("/{id}")
+    @GetMapping("/all")
+    public List<Movie> getAll() {
+        return movieService.getMovies();
+    }
+
+    @PostMapping
+    public ResponseEntity<Movie> addNewMovie(@Valid @RequestBody Movie movie) {
+        movieService.addMovie(movie);
+        return ResponseEntity.ok(movie);
+
+    }
+
+    @PutMapping("/update/{movieTitle}")
     public ResponseEntity<Movie> updateMovieInfo(
-            @PathVariable Long id,
+            @PathVariable String movieTitle,
             @Valid @RequestBody Movie movieDetails) {
 
-        Movie updated = movieService.updateMovie(id, movieDetails);
+        Movie updated = movieService.updateMovie(movieTitle, movieDetails);
         return ResponseEntity.ok(updated);
 
     }
 
-    @PostMapping
-    public ResponseEntity<String> addNewMovie(@Valid @RequestBody Movie movie) {
-        movieService.addMovie(movie);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Movie was added successfully.");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
-        movieService.deleteMovie(id);
-        return ResponseEntity.ok("Movie with id " + id + " was deleted successfully.");
-    }
-
-    @GetMapping
-    public List<Movie> getAll() {
-        return movieService.getMovies();
+    @DeleteMapping("/{movieTitle}")
+    public ResponseEntity<String> deleteMovie(@PathVariable String movieTitle) {
+        movieService.deleteMovie(movieTitle);
+        return ResponseEntity.ok("Movie with title " + movieTitle + " was deleted successfully.");
     }
 }
+
+

@@ -3,12 +3,14 @@ package com.example.movieticket.ticket;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/tickets")
+@RequestMapping("/bookings")
 public class TicketController {
     private final TicketService ticketService;
 
@@ -17,13 +19,8 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<String> bookTicket(@Valid @RequestBody Ticket ticket) {
+    public ResponseEntity<Map<String, UUID>> bookTicket(@Valid @RequestBody Ticket ticket) {
         ticketService.addTicket(ticket);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Ticket was booked successfully.");
-    }
-
-    @GetMapping("/{id}")
-    public Ticket getTicketById(@PathVariable Long id) {
-        return ticketService.getTicketById(id);
+        return ResponseEntity.ok(Map.of("bookingId", ticket.getId()));
     }
 }

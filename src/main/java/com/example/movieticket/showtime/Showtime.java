@@ -1,6 +1,5 @@
 package com.example.movieticket.showtime;
 
-import com.example.movieticket.exception.ValidationException;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -36,17 +35,6 @@ public class Showtime {
 
     @DecimalMin(value = "0.01", message = " Price must be greater than 0. ")
     @NotNull(message = " Price is required. ")
-    private Float price;
+    private Double price;
 
-    @Override
-    public String toString() {
-        return "Showtime{" +
-                "id=" + id +
-                ", movieId=" + movieId +
-                ", theater='" + theater + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", price=" + price +
-                '}';
-    }
 }

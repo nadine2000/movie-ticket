@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -66,7 +65,7 @@ class ShowtimeControllerTest {
                 "Theater A",
                 startTime,
                 endTime,
-                12.50F
+                12.50
         );
 
         updatedShowtime = new Showtime(
@@ -75,47 +74,34 @@ class ShowtimeControllerTest {
                 "Theater B",
                 LocalDateTime.of(2024, 1, 16, 20, 0),
                 LocalDateTime.of(2024, 1, 16, 22, 30),
-                15.00F
+                15.00
         );
     }
 
     @Nested
-    @DisplayName("POST /showtime - Add New Showtime Tests")
+    @DisplayName("POST /showtimes - Add New Showtime Tests")
     class AddNewShowtimeTests {
 
         @Test
-        @DisplayName("Should add showtime and return 201 CREATED with success message")
-        void shouldAddShowtime_AndReturn201Created() throws Exception {
+        @DisplayName("Should add showtime and return 200 ok with success message")
+        void shouldAddShowtimeAndReturn200Created() throws Exception {
             doNothing().when(showtimeService).addShowtime(any(Showtime.class));
-             
-            mockMvc.perform(post("/showtime")
+
+            mockMvc.perform(post("/showtimes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testShowtime)))
                     .andDo(print())
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string("Showtime was added successfully."));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.movieId").value(1L))
+                    .andExpect(jsonPath("$.theater").value("Theater A"))
+                    .andExpect(jsonPath("$.startTime").exists())
+                    .andExpect(jsonPath("$.endTime").exists())
+                    .andExpect(jsonPath("$.price").value(12.50));
 
             verify(showtimeService, times(1)).addShowtime(any(Showtime.class));
         }
 
-        @Test
-        @DisplayName("Should call service with correct showtime data")
-        void shouldCallService_WithCorrectShowtimeData() throws Exception {
-             doNothing().when(showtimeService).addShowtime(any(Showtime.class));
-
-            // Act
-            mockMvc.perform(post("/showtime")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(testShowtime)))
-                    .andExpect(status().isCreated());
-
-            // Assert
-            verify(showtimeService).addShowtime(argThat(showtime ->
-                    showtime.getMovieId().equals(1L) &&
-                            showtime.getTheater().equals("Theater A") &&
-                            showtime.getPrice() == 12.50
-            ));
-        }
 
         @Test
         @DisplayName("Should throw ValidationException when showtime has invalid data")
@@ -126,14 +112,14 @@ class ShowtimeControllerTest {
                     "Theater A",
                     LocalDateTime.of(2024, 1, 15, 22, 0),
                     LocalDateTime.of(2024, 1, 15, 20, 0), // End before start
-                    12.50F
+                    12.50
             );
 
             doThrow(new ValidationException("End time must be after start time"))
                     .when(showtimeService).addShowtime(any(Showtime.class));
 
-             
-            mockMvc.perform(post("/showtime")
+
+            mockMvc.perform(post("/showtimes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidShowtime)))
                     .andDo(print())
@@ -148,8 +134,8 @@ class ShowtimeControllerTest {
              doThrow(new ValidationException("Showtime overlaps with another showtime in the same theater"))
                     .when(showtimeService).addShowtime(any(Showtime.class));
 
-             
-            mockMvc.perform(post("/showtime")
+
+            mockMvc.perform(post("/showtimes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testShowtime)))
                     .andDo(print())
@@ -170,11 +156,11 @@ class ShowtimeControllerTest {
                     "Theater A",
                     startTime,
                     endTime,
-                    12.50F
+                    12.50
             );
 
-             
-            mockMvc.perform(post("/showtime")
+
+            mockMvc.perform(post("/showtimes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(showtimeWithInvalidMovie)))
                     .andDo(print())
@@ -185,31 +171,35 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should accept valid showtime with all required fields")
-        void shouldAcceptValidShowtime_WithAllRequiredFields() throws Exception {
+        void shouldAcceptValidShowtimeWithAllRequiredFields() throws Exception {
              Showtime validShowtime = new Showtime(
                     null,
                     2L,
                     "Theater C",
                     LocalDateTime.of(2024, 1, 20, 18, 0),
                     LocalDateTime.of(2024, 1, 20, 20, 30),
-                    14.00F
+                    14.00
             );
             doNothing().when(showtimeService).addShowtime(any(Showtime.class));
 
-             
-            mockMvc.perform(post("/showtime")
+
+            mockMvc.perform(post("/showtimes")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validShowtime)))
                     .andDo(print())
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string("Showtime was added successfully."));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.movieId").value(2))
+                    .andExpect(jsonPath("$.theater").value("Theater C"))
+                    .andExpect(jsonPath("$.startTime").exists())
+                    .andExpect(jsonPath("$.endTime").exists())
+                    .andExpect(jsonPath("$.price").value(14.00));
 
             verify(showtimeService, times(1)).addShowtime(any(Showtime.class));
         }
     }
 
     @Nested
-    @DisplayName("GET /showtime/{id} - Get Showtime By Id Tests")
+    @DisplayName("GET /showtimes/{id} - Get Showtime By Id Tests")
     class GetShowtimeByIdTests {
 
         @Test
@@ -217,8 +207,8 @@ class ShowtimeControllerTest {
         void shouldReturnShowtime_WithStatus200() throws Exception {
              when(showtimeService.getShowtimeById(1L)).thenReturn(testShowtime);
 
-             
-            mockMvc.perform(get("/showtime/1")
+
+            mockMvc.perform(get("/showtimes/1")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -237,8 +227,8 @@ class ShowtimeControllerTest {
             when(showtimeService.getShowtimeById(nonExistentId))
                     .thenThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."));
 
-             
-            mockMvc.perform(get("/showtime/" + nonExistentId)
+
+            mockMvc.perform(get("/showtimes/" + nonExistentId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isNotFound());
@@ -256,12 +246,12 @@ class ShowtimeControllerTest {
                     "Theater D",
                     LocalDateTime.of(2024, 1, 20, 15, 0),
                     LocalDateTime.of(2024, 1, 20, 17, 0),
-                    10.00F
+                    10.00
             );
             when(showtimeService.getShowtimeById(showtimeId)).thenReturn(differentShowtime);
 
-             
-            mockMvc.perform(get("/showtime/" + showtimeId)
+
+            mockMvc.perform(get("/showtimes/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -277,8 +267,8 @@ class ShowtimeControllerTest {
         void shouldReturnCorrectContentType() throws Exception {
              when(showtimeService.getShowtimeById(1L)).thenReturn(testShowtime);
 
-             
-            mockMvc.perform(get("/showtime/1"))
+
+            mockMvc.perform(get("/showtimes/1"))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -288,7 +278,7 @@ class ShowtimeControllerTest {
     }
 
     @Nested
-    @DisplayName("PUT /showtime/{id} - Update Showtime Tests")
+    @DisplayName("PUT /showtimes/{id} - Update Showtime Tests")
     class UpdateShowtimeTests {
 
         @Test
@@ -296,8 +286,8 @@ class ShowtimeControllerTest {
         void shouldUpdateShowtime_AndReturn200Ok() throws Exception {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
-             
-            mockMvc.perform(put("/showtime/1")
+
+            mockMvc.perform(put("/showtimes/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -317,8 +307,8 @@ class ShowtimeControllerTest {
             when(showtimeService.updateShowtime(eq(nonExistentId), any(Showtime.class)))
                     .thenThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."));
 
-             
-            mockMvc.perform(put("/showtime/" + nonExistentId)
+
+            mockMvc.perform(put("/showtimes/" + nonExistentId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -336,14 +326,14 @@ class ShowtimeControllerTest {
                     "Theater A",
                     LocalDateTime.of(2024, 1, 16, 22, 0),
                     LocalDateTime.of(2024, 1, 16, 20, 0), // End before start
-                    15.00F
+                    15.00
             );
 
             when(showtimeService.updateShowtime(eq(1L), any(Showtime.class)))
                     .thenThrow(new ValidationException("End time must be after start time"));
 
-             
-            mockMvc.perform(put("/showtime/1")
+
+            mockMvc.perform(put("/showtimes/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidUpdate)))
                     .andDo(print())
@@ -358,8 +348,8 @@ class ShowtimeControllerTest {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class)))
                     .thenThrow(new ValidationException("Showtime overlaps with another showtime in the same theater"));
 
-             
-            mockMvc.perform(put("/showtime/1")
+
+            mockMvc.perform(put("/showtimes/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -378,13 +368,13 @@ class ShowtimeControllerTest {
                     "Theater E",
                     LocalDateTime.of(2024, 1, 25, 19, 0),
                     LocalDateTime.of(2024, 1, 25, 21, 0),
-                    18.00F
+                    18.00
             );
             when(showtimeService.updateShowtime(eq(showtimeId), any(Showtime.class)))
                     .thenReturn(updatedShowtimeWithNewId);
 
-             
-            mockMvc.perform(put("/showtime/" + showtimeId)
+
+            mockMvc.perform(put("/showtimes/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtimeWithNewId)))
                     .andDo(print())
@@ -399,32 +389,31 @@ class ShowtimeControllerTest {
         void shouldCallService_WithCorrectIdAndShowtimeDetails() throws Exception {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
-            // Act
-            mockMvc.perform(put("/showtime/1")
+
+            mockMvc.perform(put("/showtimes/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andExpect(status().isOk());
 
-            // Assert
             verify(showtimeService).updateShowtime(eq(1L), argThat(showtime ->
                     showtime.getTheater().equals("Theater B") &&
-                            showtime.getPrice() == 15.00F
+                            showtime.getPrice() == 15.00
             ));
         }
     }
 
     @Nested
-    @DisplayName("DELETE /showtime/{id} - Delete Showtime Tests")
+    @DisplayName("DELETE /showtimes/{id} - Delete Showtime Tests")
     class DeleteShowtimeTests {
 
         @Test
         @DisplayName("Should delete showtime and return 200 OK with success message")
         void shouldDeleteShowtime_AndReturn200Ok() throws Exception {
-             Long showtimeId = 1L;
+             long showtimeId = 1L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
 
-             
-            mockMvc.perform(delete("/showtime/" + showtimeId)
+
+            mockMvc.perform(delete("/showtimes/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -436,12 +425,12 @@ class ShowtimeControllerTest {
         @Test
         @DisplayName("Should return 404 NOT FOUND when deleting non-existent showtime")
         void shouldReturn404NotFound_WhenDeletingNonExistentShowtime() throws Exception {
-             Long nonExistentId = 999L;
+             long nonExistentId = 999L;
             doThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."))
                     .when(showtimeService).deleteShowtime(nonExistentId);
 
-             
-            mockMvc.perform(delete("/showtime/" + nonExistentId)
+
+            mockMvc.perform(delete("/showtimes/" + nonExistentId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isNotFound());
@@ -452,11 +441,11 @@ class ShowtimeControllerTest {
         @Test
         @DisplayName("Should handle different showtime IDs correctly")
         void shouldHandleDifferentShowtimeIds_Correctly() throws Exception {
-             Long showtimeId = 123L;
+             long showtimeId = 123L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
 
-             
-            mockMvc.perform(delete("/showtime/" + showtimeId)
+
+            mockMvc.perform(delete("/showtimes/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
@@ -468,15 +457,13 @@ class ShowtimeControllerTest {
         @Test
         @DisplayName("Should verify service method is called with correct ID")
         void shouldVerifyServiceMethod_IsCalledWithCorrectId() throws Exception {
-             Long showtimeId = 77L;
+             long showtimeId = 77L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
-
-            // Act
-            mockMvc.perform(delete("/showtime/" + showtimeId)
+            
+            mockMvc.perform(delete("/showtimes/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
-
-            // Assert
+            
             verify(showtimeService, times(1)).deleteShowtime(showtimeId);
         }
     }

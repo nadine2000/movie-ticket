@@ -21,11 +21,6 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
-    public Ticket getTicketById(Long id) {
-        return ticketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ERROR: Ticket with id " + id + " does not exist."));
-    }
-
     private void validateTicket(Ticket ticket) {
         showtimeService.validateShowtimeExists(ticket.getShowtimeId());
         boolean bookedSeat = ticketRepository.existsByShowtimeIdAndSeatNumber(ticket.getShowtimeId(), ticket.getSeatNumber());

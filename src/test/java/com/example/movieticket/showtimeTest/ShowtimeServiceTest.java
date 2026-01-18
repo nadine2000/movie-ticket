@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +53,7 @@ class ShowtimeServiceTest {
                 "Theater A",
                 startTime,
                 endTime,
-                12.50F
+                12.50
         );
 
         updatedShowtime = new Showtime(
@@ -63,7 +62,7 @@ class ShowtimeServiceTest {
                 "Theater B",
                 LocalDateTime.of(2024, 1, 16, 20, 0),
                 LocalDateTime.of(2024, 1, 16, 22, 30),
-                15.00F
+                15.00
         );
     }
 
@@ -74,7 +73,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should successfully add showtime when all validations pass")
         void shouldAddShowtime_WhenAllValidationsPass() {
-            
+
             doNothing().when(movieService).validateMovieExists(1L);
             when(showtimeRepository.findOverlappingShowtime(
                     testShowtime.getTheater(),
@@ -99,14 +98,14 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when end time is before start time")
         void shouldThrowValidationException_WhenEndTimeIsBeforeStartTime() {
-            
+
             Showtime invalidShowtime = new Showtime(
                     null,
                     1L,
                     "Theater A",
                     LocalDateTime.of(2024, 1, 15, 21, 0),
                     LocalDateTime.of(2024, 1, 15, 19, 0), // End before start
-                    12.50F
+                    12.50
             );
 
             assertThatThrownBy(() -> showtimeService.addShowtime(invalidShowtime))
@@ -119,7 +118,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when end time equals start time")
         void shouldThrowValidationException_WhenEndTimeEqualsStartTime() {
-            
+
             LocalDateTime sameTime = LocalDateTime.of(2024, 1, 15, 19, 0);
             Showtime invalidShowtime = new Showtime(
                     null,
@@ -127,7 +126,7 @@ class ShowtimeServiceTest {
                     "Theater A",
                     sameTime,
                     sameTime,
-                    12.50F
+                    12.50
             );
 
 
@@ -141,7 +140,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ResourceNotFoundException when movie does not exist")
         void shouldThrowResourceNotFoundException_WhenMovieDoesNotExist() {
-            
+
             doThrow(new ResourceNotFoundException("ERROR: Movie with id 999 does not exist."))
                     .when(movieService).validateMovieExists(999L);
 
@@ -151,7 +150,7 @@ class ShowtimeServiceTest {
                     "Theater A",
                     startTime,
                     endTime,
-                    12.50F
+                    12.50
             );
 
 
@@ -165,14 +164,14 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when showtime overlaps with existing showtime")
         void shouldThrowValidationException_WhenShowtimeOverlaps() {
-            
+
             Showtime overlappingShowtime = new Showtime(
                     2L,
                     2L,
                     "Theater A",
                     startTime.plusMinutes(30),
                     endTime.plusMinutes(30),
-                    15.00F
+                    15.00
             );
 
             doNothing().when(movieService).validateMovieExists(1L);
@@ -180,7 +179,7 @@ class ShowtimeServiceTest {
                     testShowtime.getTheater(),
                     testShowtime.getStartTime(),
                     testShowtime.getEndTime()
-            )).thenReturn(Arrays.asList(overlappingShowtime));
+            )).thenReturn(List.of(overlappingShowtime));
 
 
             assertThatThrownBy(() -> showtimeService.addShowtime(testShowtime))
@@ -193,14 +192,14 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should allow showtime in different theater at same time")
         void shouldAllowShowtime_InDifferentTheaterAtSameTime() {
-            
+
             Showtime showtimeInDifferentTheater = new Showtime(
                     null,
                     1L,
                     "Theater B", // Different theater
                     startTime,
                     endTime,
-                    12.50F
+                    12.50
             );
 
             doNothing().when(movieService).validateMovieExists(1L);
@@ -226,7 +225,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should return showtime when valid id is provided")
         void shouldReturnShowtime_WhenValidIdProvided() {
-            
+
             when(showtimeRepository.findById(1L)).thenReturn(Optional.of(testShowtime));
 
 
@@ -244,7 +243,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ResourceNotFoundException when showtime not found")
         void shouldThrowResourceNotFoundException_WhenShowtimeNotFound() {
-            
+
             Long nonExistentId = 999L;
             when(showtimeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -263,7 +262,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should update showtime successfully when all validations pass")
         void shouldUpdateShowtime_WhenAllValidationsPass() {
-            
+
             when(showtimeRepository.existsById(1L)).thenReturn(true);
             doNothing().when(movieService).validateMovieExists(1L);
             when(showtimeRepository.findOverlappingShowtime(
@@ -287,7 +286,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ResourceNotFoundException when updating non-existent showtime")
         void shouldThrowResourceNotFoundException_WhenUpdatingNonExistentShowtime() {
-            
+
             Long nonExistentId = 999L;
             when(showtimeRepository.existsById(nonExistentId)).thenReturn(false);
 
@@ -302,17 +301,17 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when updated showtime has invalid times")
         void shouldThrowValidationException_WhenUpdatedShowtimeHasInvalidTimes() {
-            
+
             Showtime invalidUpdate = new Showtime(
                     1L,
                     1L,
                     "Theater A",
                     LocalDateTime.of(2024, 1, 16, 22, 0),
                     LocalDateTime.of(2024, 1, 16, 20, 0), // End before start
-                    15.00F
+                    15.00
             );
             when(showtimeRepository.existsById(1L)).thenReturn(true);
-            
+
             assertThatThrownBy(() -> showtimeService.updateShowtime(1L, invalidUpdate))
                     .isInstanceOf(ValidationException.class)
                     .hasMessageContaining("End time must be after start time");
@@ -323,14 +322,14 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when updated showtime overlaps")
         void shouldThrowValidationException_WhenUpdatedShowtimeOverlaps() {
-            
+
             Showtime overlapping = new Showtime(
                     2L,
                     2L,
                     "Theater B",
                     updatedShowtime.getStartTime(),
                     updatedShowtime.getEndTime(),
-                    10.00F
+                    10.00
             );
 
             when(showtimeRepository.existsById(1L)).thenReturn(true);
@@ -339,7 +338,7 @@ class ShowtimeServiceTest {
                     updatedShowtime.getTheater(),
                     updatedShowtime.getStartTime(),
                     updatedShowtime.getEndTime()
-            )).thenReturn(Arrays.asList(overlapping));
+            )).thenReturn(List.of(overlapping));
 
 
             assertThatThrownBy(() -> showtimeService.updateShowtime(1L, updatedShowtime))
@@ -352,7 +351,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should create new Showtime object with updated details")
         void shouldCreateNewShowtimeObject_WithUpdatedDetails() {
-            
+
             when(showtimeRepository.existsById(1L)).thenReturn(true);
             doNothing().when(movieService).validateMovieExists(1L);
             when(showtimeRepository.findOverlappingShowtime(
@@ -382,7 +381,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should delete showtime successfully when valid id provided")
         void shouldDeleteShowtime_WhenValidIdProvided() {
-            
+
             when(showtimeRepository.findById(1L)).thenReturn(Optional.of(testShowtime));
             doNothing().when(showtimeRepository).delete(testShowtime);
 
@@ -397,7 +396,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ResourceNotFoundException when deleting non-existent showtime")
         void shouldThrowResourceNotFoundException_WhenDeletingNonExistentShowtime() {
-            
+
             Long nonExistentId = 999L;
             when(showtimeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -417,7 +416,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should not throw exception when showtime exists")
         void shouldNotThrowException_WhenShowtimeExists() {
-            
+
             when(showtimeRepository.existsById(1L)).thenReturn(true);
 
 
@@ -429,7 +428,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ResourceNotFoundException when showtime does not exist")
         void shouldThrowResourceNotFoundException_WhenShowtimeDoesNotExist() {
-            
+
             Long nonExistentId = 999L;
             when(showtimeRepository.existsById(nonExistentId)).thenReturn(false);
 
@@ -448,7 +447,7 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should validate all conditions in correct order")
         void shouldValidateAllConditions_InCorrectOrder() {
-            
+
             doNothing().when(movieService).validateMovieExists(1L);
             when(showtimeRepository.findOverlappingShowtime(
                     testShowtime.getTheater(),
@@ -472,18 +471,18 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should stop validation at first failure")
         void shouldStopValidation_AtFirstFailure() {
-            
+
             Showtime invalidShowtime = new Showtime(
                     null,
                     1L,
                     "Theater A",
                     LocalDateTime.of(2024, 1, 15, 22, 0),
                     LocalDateTime.of(2024, 1, 15, 20, 0), // Invalid times
-                    12.50F
+                    12.50
             );
 
 
-            
+
             assertThatThrownBy(() -> showtimeService.addShowtime(invalidShowtime))
                     .isInstanceOf(ValidationException.class);
 
