@@ -84,10 +84,10 @@ cd movie-ticket
 
 | Method | Endpoint       | Description          |
 | ------ | -------------- | -------------------- |
-| GET    | `/movies`      | Fetch all movies     |
+| GET    | `/movies/all`  | Fetch all movies     |
 | POST   | `/movies`      | Add a new movie      |
-| PUT    | `/movies/{id}` | Update a movie       |
-| DELETE | `/movies/{id}` | Delete a movie by ID |
+| PUT    | `/movies/{title}` | Update a movie       |
+| DELETE | `/movies/{title}` | Delete a movie by ID |
 
 ### **Showtimes**
 
@@ -103,7 +103,7 @@ cd movie-ticket
 | Method | Endpoint        | Description                  |
 | ------ | --------------- | ---------------------------- |
 | POST   | `/tickets`      | Book a ticket for a showtime |
-| GET    | `/tickets/{id}` | Get ticket by ID             |
+
 
 ---
 
