@@ -21,7 +21,7 @@ public class ShowtimeController {
         return showtimeService.getShowtimeById(id);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Showtime> updateShowtimeInfo(
             @PathVariable Long id,
             @Valid @RequestBody Showtime showtimeDetails) {

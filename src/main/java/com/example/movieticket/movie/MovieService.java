@@ -15,7 +15,9 @@ public class MovieService {
     }
 
     public Movie updateMovie(String movieTitle, Movie movieDetails) {
-        getMovieByTitle(movieTitle);
+        Movie existingMovie = getMovieByTitle(movieTitle);
+        Long existingId = existingMovie.getId();
+        movieDetails.setId(existingId);
         return movieRepository.save(movieDetails);
     }
 

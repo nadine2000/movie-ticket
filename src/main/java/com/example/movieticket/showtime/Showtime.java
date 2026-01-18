@@ -37,4 +37,15 @@ public class Showtime {
     @NotNull(message = " Price is required. ")
     private Double price;
 
+    @Override
+    public String toString() {
+        return "Showtime{" +
+                "id=" + id +
+                ", movieId=" + movieId +
+                ", theater='" + theater + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", price=" + price +
+                '}';
+    }
 }

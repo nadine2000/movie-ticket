@@ -18,23 +18,24 @@ public class ShowtimeService {
     }
 
     public Showtime updateShowtime(Long id, Showtime showtimeDetails) {
+        Showtime oldShowTime = getShowtimeById(id);
+        boolean timeDidNotChanged = oldShowTime.getStartTime().equals(showtimeDetails.getStartTime())
+                && oldShowTime.getEndTime().equals(showtimeDetails.getEndTime());
 
-        validateShowtimeExists(id);
-        validateShowtime(showtimeDetails);
+        System.out.println("timeDidNotChanged: " + timeDidNotChanged);
+        if ((timeDidNotChanged)) {
+            validateShowtime(showtimeDetails, id);
+        } else {
+            validateShowtime(showtimeDetails, null);
+        }
 
-        return showtimeRepository.save(new Showtime(
-                id,
-                showtimeDetails.getMovieId(),
-                showtimeDetails.getTheater(),
-                showtimeDetails.getStartTime(),
-                showtimeDetails.getEndTime(),
-                showtimeDetails.getPrice()
-        ));
+        showtimeDetails.setId(id);
+        return showtimeRepository.save(showtimeDetails);
 
     }
 
     public void addShowtime(Showtime showtime) {
-        validateShowtime(showtime);
+        validateShowtime(showtime, null);
         showtimeRepository.save(showtime);
     }
 
@@ -43,6 +44,7 @@ public class ShowtimeService {
         showtimeRepository.delete(toDelete);
     }
 
+// todo: remove
     public void validateShowtimeExists(long id) {
         if  (!showtimeRepository.existsById(id)) {
             throw new ResourceNotFoundException("ERROR: Showtime with id " + id + " does not exist.");
@@ -55,7 +57,7 @@ public class ShowtimeService {
     }
 
 
-    private void validateShowtime(Showtime showtime) {
+    private void validateShowtime(Showtime showtime, Long excludeId) {
 
         if (!showtime.getEndTime().isAfter(showtime.getStartTime())) {
             throw new ValidationException("End time must be after start time");
@@ -63,11 +65,13 @@ public class ShowtimeService {
 
         movieService.validateMovieExists(showtime.getMovieId());
 
-        List<Showtime> overlapping = showtimeRepository.findOverlappingShowtime(
-                showtime.getTheater(), showtime.getStartTime(), showtime.getEndTime());
+        if (excludeId == null) {
+            List<Showtime> overlapping = showtimeRepository.findOverlappingShowtime(
+                    showtime.getTheater(), showtime.getStartTime(), showtime.getEndTime());
 
-        if (!overlapping.isEmpty()) {
-            throw new ValidationException("Showtime overlaps with another showtime in the same theater");
+            if (!overlapping.isEmpty()) {
+                throw new ValidationException("Showtime overlaps with another showtime in the same theater");
+            }
         }
     }
 

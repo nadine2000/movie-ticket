@@ -287,7 +287,7 @@ class ShowtimeControllerTest {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
 
-            mockMvc.perform(put("/showtimes/1")
+            mockMvc.perform(put("/showtimes/update/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -308,7 +308,7 @@ class ShowtimeControllerTest {
                     .thenThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."));
 
 
-            mockMvc.perform(put("/showtimes/" + nonExistentId)
+            mockMvc.perform(put("/showtimes/update/" + nonExistentId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -333,7 +333,7 @@ class ShowtimeControllerTest {
                     .thenThrow(new ValidationException("End time must be after start time"));
 
 
-            mockMvc.perform(put("/showtimes/1")
+            mockMvc.perform(put("/showtimes/update/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidUpdate)))
                     .andDo(print())
@@ -349,7 +349,7 @@ class ShowtimeControllerTest {
                     .thenThrow(new ValidationException("Showtime overlaps with another showtime in the same theater"));
 
 
-            mockMvc.perform(put("/showtimes/1")
+            mockMvc.perform(put("/showtimes/update/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andDo(print())
@@ -374,7 +374,7 @@ class ShowtimeControllerTest {
                     .thenReturn(updatedShowtimeWithNewId);
 
 
-            mockMvc.perform(put("/showtimes/" + showtimeId)
+            mockMvc.perform(put("/showtimes/update/" + showtimeId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtimeWithNewId)))
                     .andDo(print())
@@ -390,7 +390,7 @@ class ShowtimeControllerTest {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
 
-            mockMvc.perform(put("/showtimes/1")
+            mockMvc.perform(put("/showtimes/update/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatedShowtime)))
                     .andExpect(status().isOk());

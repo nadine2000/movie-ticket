@@ -12,4 +12,5 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
     List<Showtime> findOverlappingShowtime(@Param("theater") String theater,
                                             @Param("startTime") LocalDateTime startTime,
                                             @Param("endTime") LocalDateTime endTime);
+
 }
