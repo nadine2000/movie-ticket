@@ -1,6 +1,6 @@
 package com.example.movieticket.ticket;
 
-import com.example.movieticket.exception.ResourceNotFoundException;
+
 import com.example.movieticket.exception.ValidationException;
 import com.example.movieticket.showtime.ShowtimeService;
 import org.springframework.stereotype.Service;

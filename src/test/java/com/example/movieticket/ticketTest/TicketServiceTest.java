@@ -57,7 +57,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should successfully add ticket when all validations pass")
-        void shouldAddTicket_WhenAllValidationsPass() {
+        void shouldAddTicketWhenAllValidationsPass() {
 
             doNothing().when(showtimeService).validateShowtimeExists(1L);
             when(ticketRepository.existsByShowtimeIdAndSeatNumber(1L, 15)).thenReturn(false);
@@ -72,7 +72,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should call repository save with correct ticket object")
-        void shouldCallRepositorySave_WithCorrectTicketObject() {
+        void shouldCallRepositorySaveWithCorrectTicketObject() {
 
             doNothing().when(showtimeService).validateShowtimeExists(1L);
             when(ticketRepository.existsByShowtimeIdAndSeatNumber(1L, 15)).thenReturn(false);
@@ -90,7 +90,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when showtime does not exist")
-        void shouldThrowResourceNotFoundException_WhenShowtimeDoesNotExist() {
+        void shouldThrowResourceNotFoundExceptionWhenShowtimeDoesNotExist() {
 
             long nonExistentShowtimeId = 999L;
             Ticket ticketWithInvalidShowtime = new Ticket(
@@ -115,7 +115,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should throw ValidationException when seat is already booked")
-        void shouldThrowValidationException_WhenSeatIsAlreadyBooked() {
+        void shouldThrowValidationExceptionWhenSeatIsAlreadyBooked() {
 
             doNothing().when(showtimeService).validateShowtimeExists(1L);
             when(ticketRepository.existsByShowtimeIdAndSeatNumber(1L, 15)).thenReturn(true);
@@ -132,7 +132,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should allow same seat number for different showtimes")
-        void shouldAllowSameSeatNumber_ForDifferentShowtimes() {
+        void shouldAllowSameSeatNumberForDifferentShowtimes() {
 
             UUID anotherUserId = UUID.randomUUID();
             Ticket ticketForDifferentShowtime = new Ticket(
@@ -157,7 +157,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should allow different seat numbers for same showtime")
-        void shouldAllowDifferentSeatNumbers_ForSameShowtime() {
+        void shouldAllowDifferentSeatNumbersForSameShowtime() {
             UUID anotherUserId = UUID.randomUUID();
             Ticket ticketWithDifferentSeat = new Ticket(
                     null,
@@ -181,7 +181,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should validate showtime before checking seat availability")
-        void shouldValidateShowtime_BeforeCheckingSeatAvailability() {
+        void shouldValidateShowtimeBeforeCheckingSeatAvailability() {
 
             doThrow(new ResourceNotFoundException("ERROR: Showtime with id 999 does not exist."))
                     .when(showtimeService).validateShowtimeExists(999L);
@@ -204,12 +204,12 @@ class TicketServiceTest {
     }
 
     @Nested
-    @DisplayName("validateTicket() - Private Method Tests (via public methods)")
+    @DisplayName("validateTicket()")
     class ValidateTicketTests {
 
         @Test
         @DisplayName("Should validate showtime exists first, then check seat availability")
-        void shouldValidateShowtimeFirst_ThenCheckSeatAvailability() {
+        void shouldValidateShowtimeFirstThenCheckSeatAvailability() {
 
             doNothing().when(showtimeService).validateShowtimeExists(1L);
             when(ticketRepository.existsByShowtimeIdAndSeatNumber(1L, 15)).thenReturn(false);
@@ -226,7 +226,7 @@ class TicketServiceTest {
 
         @Test
         @DisplayName("Should stop validation at first failure")
-        void shouldStopValidation_AtFirstFailure() {
+        void shouldStopValidationAtFirstFailure() {
 
             doThrow(new ResourceNotFoundException("ERROR: Showtime with id 1 does not exist."))
                     .when(showtimeService).validateShowtimeExists(1L);
@@ -235,7 +235,7 @@ class TicketServiceTest {
             assertThatThrownBy(() -> ticketService.addTicket(testTicket))
                     .isInstanceOf(ResourceNotFoundException.class);
 
-            // Verify subsequent validations were not called
+
             verify(showtimeService, times(1)).validateShowtimeExists(1L);
             verify(ticketRepository, never()).existsByShowtimeIdAndSeatNumber(anyLong(), anyInt());
             verify(ticketRepository, never()).save(any(Ticket.class));

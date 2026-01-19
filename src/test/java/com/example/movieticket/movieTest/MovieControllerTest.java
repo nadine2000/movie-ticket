@@ -94,7 +94,7 @@ class MovieControllerTest {
 
         @Test
         @DisplayName("POST /movies - should return 400 Bad Request when invalid data is sent")
-        void shouldReturnBadRequest_WhenInvalidMovieData() throws Exception {
+        void shouldReturnBadRequestWhenInvalidMovieData() throws Exception {
             Movie invalidMovie = new Movie(null, "", "", -10, 15.0, 1800);
 
             mockMvc.perform(post("/movies")

@@ -56,8 +56,8 @@ class ShowtimeControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-        startTime = LocalDateTime.of(2024, 1, 15, 19, 0);
-        endTime = LocalDateTime.of(2024, 1, 15, 21, 30);
+        startTime = LocalDateTime.of(2026, 1, 15, 19, 0);
+        endTime = LocalDateTime.of(2026, 1, 15, 21, 30);
 
         testShowtime = new Showtime(
                 1L,
@@ -72,8 +72,8 @@ class ShowtimeControllerTest {
                 1L,
                 1L,
                 "Theater B",
-                LocalDateTime.of(2024, 1, 16, 20, 0),
-                LocalDateTime.of(2024, 1, 16, 22, 30),
+                LocalDateTime.of(2026, 1, 16, 20, 0),
+                LocalDateTime.of(2026, 1, 16, 22, 30),
                 15.00
         );
     }
@@ -84,7 +84,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should add showtime and return 200 ok with success message")
-        void shouldAddShowtimeAndReturn200Created() throws Exception {
+        void shouldAddShowtimeAndReturn200OK() throws Exception {
             doNothing().when(showtimeService).addShowtime(any(Showtime.class));
 
             mockMvc.perform(post("/showtimes")
@@ -105,7 +105,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should throw ValidationException when showtime has invalid data")
-        void shouldThrowValidationException_WhenShowtimeHasInvalidData() throws Exception {
+        void shouldThrowValidationExceptionWhenShowtimeHasInvalidData() throws Exception {
              Showtime invalidShowtime = new Showtime(
                     null,
                     1L,
@@ -130,7 +130,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should throw ValidationException when showtime overlaps")
-        void shouldThrowValidationException_WhenShowtimeOverlaps() throws Exception {
+        void shouldThrowValidationExceptionWhenShowtimeOverlaps() throws Exception {
              doThrow(new ValidationException("Showtime overlaps with another showtime in the same theater"))
                     .when(showtimeService).addShowtime(any(Showtime.class));
 
@@ -146,7 +146,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when movie does not exist")
-        void shouldThrowResourceNotFoundException_WhenMovieDoesNotExist() throws Exception {
+        void shouldThrowResourceNotFoundExceptionWhenMovieDoesNotExist() throws Exception {
              doThrow(new ResourceNotFoundException("ERROR: Movie with id 999 does not exist."))
                     .when(showtimeService).addShowtime(any(Showtime.class));
 
@@ -204,7 +204,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return showtime with 200 OK when valid id provided")
-        void shouldReturnShowtime_WithStatus200() throws Exception {
+        void shouldReturnShowtimeWithStatus200() throws Exception {
              when(showtimeService.getShowtimeById(1L)).thenReturn(testShowtime);
 
 
@@ -222,7 +222,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return 404 NOT FOUND when showtime does not exist")
-        void shouldReturn404NotFound_WhenShowtimeDoesNotExist() throws Exception {
+        void shouldReturn404NotFoundWhenShowtimeDoesNotExist() throws Exception {
              Long nonExistentId = 999L;
             when(showtimeService.getShowtimeById(nonExistentId))
                     .thenThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."));
@@ -238,7 +238,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should handle different showtime IDs correctly")
-        void shouldHandleDifferentShowtimeIds_Correctly() throws Exception {
+        void shouldHandleDifferentShowtimeIdsCorrectly() throws Exception {
              Long showtimeId = 42L;
             Showtime differentShowtime = new Showtime(
                     42L,
@@ -283,7 +283,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should update showtime and return 200 OK with updated showtime")
-        void shouldUpdateShowtime_AndReturn200Ok() throws Exception {
+        void shouldUpdateShowtimeAndReturn200Ok() throws Exception {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
 
@@ -302,7 +302,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return 404 NOT FOUND when updating non-existent showtime")
-        void shouldReturn404NotFound_WhenUpdatingNonExistentShowtime() throws Exception {
+        void shouldReturn404NotFoundWhenUpdatingNonExistentShowtime() throws Exception {
              Long nonExistentId = 999L;
             when(showtimeService.updateShowtime(eq(nonExistentId), any(Showtime.class)))
                     .thenThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."));
@@ -319,7 +319,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return 400 BAD REQUEST when update has invalid times")
-        void shouldReturn400BadRequest_WhenUpdateHasInvalidTimes() throws Exception {
+        void shouldReturn400BadRequestWhenUpdateHasInvalidTimes() throws Exception {
              Showtime invalidUpdate = new Showtime(
                     1L,
                     1L,
@@ -344,7 +344,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return 400 BAD REQUEST when update causes overlap")
-        void shouldReturn400BadRequest_WhenUpdateCausesOverlap() throws Exception {
+        void shouldReturn400BadRequestWhenUpdateCausesOverlap() throws Exception {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class)))
                     .thenThrow(new ValidationException("Showtime overlaps with another showtime in the same theater"));
 
@@ -386,7 +386,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should call service with correct ID and showtime details")
-        void shouldCallService_WithCorrectIdAndShowtimeDetails() throws Exception {
+        void shouldCallServiceWithCorrectIdAndShowtimeDetails() throws Exception {
              when(showtimeService.updateShowtime(eq(1L), any(Showtime.class))).thenReturn(updatedShowtime);
 
 
@@ -408,7 +408,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should delete showtime and return 200 OK with success message")
-        void shouldDeleteShowtime_AndReturn200Ok() throws Exception {
+        void shouldDeleteShowtimeAndReturn200Ok() throws Exception {
              long showtimeId = 1L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
 
@@ -424,7 +424,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should return 404 NOT FOUND when deleting non-existent showtime")
-        void shouldReturn404NotFound_WhenDeletingNonExistentShowtime() throws Exception {
+        void shouldReturn404NotFoundWhenDeletingNonExistentShowtime() throws Exception {
              long nonExistentId = 999L;
             doThrow(new ResourceNotFoundException("ERROR: Showtime with id " + nonExistentId + " does not exist."))
                     .when(showtimeService).deleteShowtime(nonExistentId);
@@ -440,7 +440,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should handle different showtime IDs correctly")
-        void shouldHandleDifferentShowtimeIds_Correctly() throws Exception {
+        void shouldHandleDifferentShowtimeIdsCorrectly() throws Exception {
              long showtimeId = 123L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
 
@@ -456,7 +456,7 @@ class ShowtimeControllerTest {
 
         @Test
         @DisplayName("Should verify service method is called with correct ID")
-        void shouldVerifyServiceMethod_IsCalledWithCorrectId() throws Exception {
+        void shouldVerifyServiceMethodIsCalledWithCorrectId() throws Exception {
              long showtimeId = 77L;
             doNothing().when(showtimeService).deleteShowtime(showtimeId);
             

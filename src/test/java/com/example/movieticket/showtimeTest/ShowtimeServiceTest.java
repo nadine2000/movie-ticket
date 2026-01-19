@@ -263,24 +263,34 @@ class ShowtimeServiceTest {
         @DisplayName("Should update showtime successfully when all validations pass")
         void shouldUpdateShowtime_WhenAllValidationsPass() {
 
+            Showtime updatedShowtime = new Showtime();
+            updatedShowtime.setTheater("Theater B");
+            updatedShowtime.setStartTime(startTime);
+            updatedShowtime.setEndTime(endTime);
+            updatedShowtime.setMovieId(1L);
+
             when(showtimeRepository.existsById(1L)).thenReturn(true);
+
             doNothing().when(movieService).validateMovieExists(1L);
-            when(showtimeRepository.findOverlappingShowtime(
+
+            when(showtimeRepository.findOverlappingShowtimeExcludingId(
                     updatedShowtime.getTheater(),
                     updatedShowtime.getStartTime(),
-                    updatedShowtime.getEndTime()
+                    updatedShowtime.getEndTime(),
+                    1L
             )).thenReturn(List.of());
-            when(showtimeRepository.save(any(Showtime.class))).thenReturn(updatedShowtime);
 
+            when(showtimeRepository.save(any(Showtime.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             Showtime result = showtimeService.updateShowtime(1L, updatedShowtime);
-
 
             assertThat(result).isNotNull();
             assertThat(result.getId()).isEqualTo(1L);
             assertThat(result.getTheater()).isEqualTo("Theater B");
-            verify(showtimeRepository, times(1)).existsById(1L);
-            verify(showtimeRepository, times(1)).save(any(Showtime.class));
+
+            verify(showtimeRepository).existsById(1L);
+            verify(showtimeRepository).save(any(Showtime.class));
         }
 
         @Test
@@ -322,7 +332,6 @@ class ShowtimeServiceTest {
         @Test
         @DisplayName("Should throw ValidationException when updated showtime overlaps")
         void shouldThrowValidationException_WhenUpdatedShowtimeOverlaps() {
-
             Showtime overlapping = new Showtime(
                     2L,
                     2L,
@@ -334,12 +343,13 @@ class ShowtimeServiceTest {
 
             when(showtimeRepository.existsById(1L)).thenReturn(true);
             doNothing().when(movieService).validateMovieExists(1L);
-            when(showtimeRepository.findOverlappingShowtime(
+
+            when(showtimeRepository.findOverlappingShowtimeExcludingId(
                     updatedShowtime.getTheater(),
                     updatedShowtime.getStartTime(),
-                    updatedShowtime.getEndTime()
+                    updatedShowtime.getEndTime(),
+                    1L
             )).thenReturn(List.of(overlapping));
-
 
             assertThatThrownBy(() -> showtimeService.updateShowtime(1L, updatedShowtime))
                     .isInstanceOf(ValidationException.class)
@@ -354,16 +364,18 @@ class ShowtimeServiceTest {
 
             when(showtimeRepository.existsById(1L)).thenReturn(true);
             doNothing().when(movieService).validateMovieExists(1L);
-            when(showtimeRepository.findOverlappingShowtime(
+
+            when(showtimeRepository.findOverlappingShowtimeExcludingId(
                     updatedShowtime.getTheater(),
                     updatedShowtime.getStartTime(),
-                    updatedShowtime.getEndTime()
+                    updatedShowtime.getEndTime(),
+                    1L
             )).thenReturn(List.of());
-            when(showtimeRepository.save(any(Showtime.class))).thenReturn(updatedShowtime);
 
+            when(showtimeRepository.save(any(Showtime.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             showtimeService.updateShowtime(1L, updatedShowtime);
-
 
             verify(showtimeRepository).save(argThat(showtime ->
                     showtime.getId().equals(1L) &&

@@ -92,7 +92,7 @@ class TicketRepositoryTest {
     @Test
     @DisplayName("Should throw ConstraintViolationException for invalid ticket values")
     void testInvalidTicketValues() {
-        Ticket invalid = createTicket(null, -9, null); // showtimeId=null, seatNumber=-9, userId=null
+        Ticket invalid = createTicket(null, -9, null);
 
         assertThatThrownBy(() -> ticketRepository.saveAndFlush(invalid))
                 .isInstanceOf(ConstraintViolationException.class)

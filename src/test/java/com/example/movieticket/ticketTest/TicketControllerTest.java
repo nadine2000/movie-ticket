@@ -70,8 +70,8 @@ class TicketControllerTest {
     class BookTicketTests {
 
         @Test
-        @DisplayName("Should book ticket and return 201 CREATED with success message")
-        void shouldBookTicket_AndReturn201Created() throws Exception {
+        @DisplayName("Should book ticket and return 200 OK with success message")
+        void shouldBookTicketAndReturn200OK() throws Exception {
 
             UUID generatedId = UUID.randomUUID();
             doAnswer(invocation -> {
@@ -92,7 +92,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should call service with correct ticket data")
-        void shouldCallService_WithCorrectTicketData() throws Exception {
+        void shouldCallServiceWithCorrectTicketData() throws Exception {
 
             UUID generatedId = UUID.randomUUID();
             doAnswer(invocation -> {
@@ -117,7 +117,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should throw ValidationException when seat is already booked")
-        void shouldThrowValidationException_WhenSeatIsAlreadyBooked() throws Exception {
+        void shouldThrowValidationExceptionWhenSeatIsAlreadyBooked() throws Exception {
 
             doThrow(new ValidationException("The wanted seat is already booked! choose anther seat."))
                     .when(ticketService).addTicket(any(Ticket.class));
@@ -134,7 +134,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when showtime does not exist")
-        void shouldThrowResourceNotFoundException_WhenShowtimeDoesNotExist() throws Exception {
+        void shouldThrowResourceNotFoundExceptionWhenShowtimeDoesNotExist() throws Exception {
 
             Ticket ticketWithInvalidShowtime = createTicket(999L, 15, testUserId);
 
@@ -153,7 +153,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should return 400 BAD REQUEST when seat number is less than 1")
-        void shouldReturn400BadRequest_WhenSeatNumberIsLessThan1() throws Exception {
+        void shouldReturn400BadRequestWhenSeatNumberIsLessThan1() throws Exception {
 
             Ticket invalidTicket = createTicket(1L, 0, testUserId);
 
@@ -169,7 +169,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should return 400 BAD REQUEST when seat number is greater than 100")
-        void shouldReturn400BadRequest_WhenSeatNumberIsGreaterThan100() throws Exception {
+        void shouldReturn400BadRequestWhenSeatNumberIsGreaterThan100() throws Exception {
 
             Ticket invalidTicket = createTicket(1L, 101, testUserId);
 
@@ -184,7 +184,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should return 400 BAD REQUEST when user ID is null")
-        void shouldReturn400BadRequest_WhenUserIdIsNull() throws Exception {
+        void shouldReturn400BadRequestWhenUserIdIsNull() throws Exception {
             Ticket invalidTicket = createTicket(1L, 15, null);
 
             mockMvc.perform(post("/bookings")
@@ -198,7 +198,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should accept ticket with seat number at minimum boundary (1)")
-        void shouldAcceptTicket_WithSeatNumberAtMinimumBoundary() throws Exception {
+        void shouldAcceptTicketWithSeatNumberAtMinimumBoundary() throws Exception {
 
             Ticket validTicket = createTicket(1L, 1, testUserId);
             UUID generatedId = UUID.randomUUID();
@@ -221,7 +221,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should accept ticket with seat number at maximum boundary (100)")
-        void shouldAcceptTicket_WithSeatNumberAtMaximumBoundary() throws Exception {
+        void shouldAcceptTicketWithSeatNumberAtMaximumBoundary() throws Exception {
 
             Ticket validTicket = createTicket(1L, 100, testUserId);
             UUID generatedId = UUID.randomUUID();
@@ -244,7 +244,7 @@ class TicketControllerTest {
 
         @Test
         @DisplayName("Should accept valid ticket with all required fields")
-        void shouldAcceptValidTicket_WithAllRequiredFields() throws Exception {
+        void shouldAcceptValidTicketWithAllRequiredFields() throws Exception {
 
             UUID anotherUserId = UUID.randomUUID();
             Ticket validTicket = createTicket(2L, 50, anotherUserId);

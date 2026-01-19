@@ -18,17 +18,8 @@ public class ShowtimeService {
     }
 
     public Showtime updateShowtime(Long id, Showtime showtimeDetails) {
-        Showtime oldShowTime = getShowtimeById(id);
-        boolean timeDidNotChanged = oldShowTime.getStartTime().equals(showtimeDetails.getStartTime())
-                && oldShowTime.getEndTime().equals(showtimeDetails.getEndTime());
-
-        System.out.println("timeDidNotChanged: " + timeDidNotChanged);
-        if ((timeDidNotChanged)) {
-            validateShowtime(showtimeDetails, id);
-        } else {
-            validateShowtime(showtimeDetails, null);
-        }
-
+        validateShowtimeExists(id);
+        validateShowtime(showtimeDetails, id);
         showtimeDetails.setId(id);
         return showtimeRepository.save(showtimeDetails);
 
@@ -44,7 +35,6 @@ public class ShowtimeService {
         showtimeRepository.delete(toDelete);
     }
 
-// todo: remove
     public void validateShowtimeExists(long id) {
         if  (!showtimeRepository.existsById(id)) {
             throw new ResourceNotFoundException("ERROR: Showtime with id " + id + " does not exist.");
@@ -65,13 +55,19 @@ public class ShowtimeService {
 
         movieService.validateMovieExists(showtime.getMovieId());
 
-        if (excludeId == null) {
-            List<Showtime> overlapping = showtimeRepository.findOverlappingShowtime(
-                    showtime.getTheater(), showtime.getStartTime(), showtime.getEndTime());
+        List<Showtime> overlapping;
 
-            if (!overlapping.isEmpty()) {
-                throw new ValidationException("Showtime overlaps with another showtime in the same theater");
-            }
+        if (excludeId == null) {
+            overlapping = showtimeRepository.findOverlappingShowtime(
+                    showtime.getTheater(), showtime.getStartTime(), showtime.getEndTime());
+        }
+        else {
+            overlapping = showtimeRepository.findOverlappingShowtimeExcludingId(
+                    showtime.getTheater(), showtime.getStartTime(), showtime.getEndTime(), excludeId);
+        }
+
+        if (!overlapping.isEmpty()) {
+            throw new ValidationException("Showtime overlaps with another showtime in the same theater");
         }
     }
 
