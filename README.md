@@ -49,12 +49,11 @@ A **RESTful API** for managing **movies, showtimes, and ticket bookings**, built
 
 ## **Technologies**
 
-* **Java 17**
+* **Java 21**
 * **Spring Boot 3.x** (MVC, Data JPA)
 * **Maven Wrapper (`mvnw`)**
 * **H2 Database** (in-memory for dev)
 * **JUnit 5 & Mockito** for testing
-* **Jackson** for JSON serialization
 
 ---
 
@@ -86,7 +85,7 @@ cd movie-ticket
 | ------ | -------------- | -------------------- |
 | GET    | `/movies/all`  | Fetch all movies     |
 | POST   | `/movies`      | Add a new movie      |
-| PUT    | `/movies/{title}` | Update a movie       |
+| PUT    | `/movies/update/{title}` | Update a movie       |
 | DELETE | `/movies/{title}` | Delete a movie by ID |
 
 ### **Showtimes**
@@ -95,7 +94,7 @@ cd movie-ticket
 | ------ | ---------------- | --------------------- |
 | GET    | `/showtime/{id}` | Fetch showtime by ID  |
 | POST   | `/showtime`      | Add a new showtime    |
-| PUT    | `/showtime/{id}` | Update a showtime     |
+| PUT    | `/showtime/update/{id}` | Update a showtime     |
 | DELETE | `/showtime/{id}` | Delete showtime by ID |
 
 ### **Tickets**
