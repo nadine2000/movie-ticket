@@ -211,7 +211,7 @@ Content-Type: application/json
 #### 3. Update Movie
 
 ```http
-PUT http://localhost:8080/movies/{title}
+PUT http://localhost:8080/movies/update/{title}
 Content-Type: application/json
 ```
 
@@ -326,7 +326,7 @@ Content-Type: application/json
 #### 3. Update Showtime
 
 ```http
-PUT http://localhost:8080/showtimes/{id}
+PUT http://localhost:8080/showtimes/update/{id}
 Content-Type: application/json
 ```
 
