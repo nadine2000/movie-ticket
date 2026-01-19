@@ -1,6 +1,6 @@
 # **Movie Ticket Booking System**
 
-A **RESTful API** for managing **movies, showtimes, and ticket bookings**, built with **Spring Boot 3**, **Java 17**, and **Maven Wrapper**. The system ensures seat availability, validates showtimes, and handles all common errors gracefully.
+A **RESTful API** for managing **movies, showtimes, and ticket bookings**, built with **Spring Boot 3**, **Java 21**, and **Maven Wrapper**. The system ensures seat availability, validates showtimes, and handles all common errors gracefully.
 
 ---
 
@@ -102,7 +102,7 @@ cd movie-ticket
 
 | Method | Endpoint        | Description                  |
 | ------ | --------------- | ---------------------------- |
-| POST   | `/tickets`      | Book a ticket for a showtime |
+| POST   | `/bookings`      | Book a ticket for a showtime |
 
 
 ---
