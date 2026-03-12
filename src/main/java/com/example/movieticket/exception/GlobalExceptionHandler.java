@@ -10,6 +10,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+// to do:
+
+// @RestControllerAdvice
+// public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
+//     @Override
+//     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+//             HttpHeaders headers, HttpStatus status, WebRequest request) {
+//     }
+
+// }
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
