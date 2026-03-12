@@ -17,6 +17,7 @@ import java.util.Map;
 //     @Override
 //     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 //             HttpHeaders headers, HttpStatus status, WebRequest request) {
+//   ex.getBindingResult().getAllErrors().forEach((error) -> errors.add(error.getDefaultMessage()));
 //     }
 
 // }
